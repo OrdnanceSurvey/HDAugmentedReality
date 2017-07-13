@@ -355,7 +355,7 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
         }
     }
     
-    internal func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateUserLocation location: CLLocation)
+    open func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateUserLocation location: CLLocation)
     {
         self.arStatus.userLocation = location
         self.lastLocation = location
@@ -365,7 +365,7 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
         if(self.uiOptions.debugLabel) { self.showDebugViewWithColor(color: UIColor.red) }
     }
     
-    internal func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateReloadLocation location: CLLocation)
+    open func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateReloadLocation location: CLLocation)
     {
         self.arStatus.userLocation = location
         self.lastLocation = location
@@ -389,9 +389,13 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
         if(self.uiOptions.debugLabel) { self.showDebugViewWithColor(color: UIColor.blue) }
     }
     
-    internal func arTrackingManager(_ trackingManager: ARTrackingManager, didFailToFindLocationAfter elapsedSeconds: TimeInterval)
+    open func arTrackingManager(_ trackingManager: ARTrackingManager, didFailToFindLocationAfter elapsedSeconds: TimeInterval)
     {
         self.onDidFailToFindLocation?(elapsedSeconds, self.lastLocation != nil)
+    }
+    
+    open func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateHeading newHeading: CLHeading) {
+        
     }
     
     //==========================================================================================================================================================
