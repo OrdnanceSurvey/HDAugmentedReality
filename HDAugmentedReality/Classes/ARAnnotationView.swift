@@ -22,6 +22,7 @@ open class ARAnnotationView: UIView
      E.g. if bottom-left edge of annotationView should point to real location, centerOffset should be (0, 1)
      */
     open var centerOffset = CGPoint(x: 0.5, y: 0.5)
+    /// Annotation associated with this view.
     open weak var annotation: ARAnnotation?
 
     // Used internally for stacking
@@ -29,7 +30,11 @@ open class ARAnnotationView: UIView
     open var arStackAlternateFrame: CGRect = CGRect.zero
     open var arStackAlternateFrameExists: Bool = false
     /// Position of annotation view without heading, pitch, stack offsets.
-    open var arZeroPoint: CGPoint = CGPoint(x: 0, y: 0)
+    open var arPosition: CGPoint = CGPoint(x: 0, y: 0)
+    /// Offset for arPosition, this is not offset for heading/pitch but offset that is set in ARPresenterTransform.
+    open var arPositionOffset = CGPoint(x: 0, y: 0)
+    /// Used for internal calculations.
+    open var arAlternateFrame: CGRect = CGRect.zero
 
     open var initialized: Bool = false
     

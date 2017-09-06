@@ -5,38 +5,45 @@
 //  Created by Danijel Huis on 16/12/2016.
 //  Copyright © 2016 Danijel Huis. All rights reserved.
 //
-
 import UIKit
 import CoreLocation
 
 /**
- Adds ARAnnotationViews on the screen and calculates its screen positions. Before anything 
- is done, it first filters annotations by distance and count for improved performance. This 
- class is also responsible for vertical stacking of the annotation views. 
+ Handles visual presentation of annotations.
+ Adds ARAnnotationViews on the screen and calculates its screen positions. Before anything
+ is done, it first filters annotations by distance and count for improved performance. This
+ class is also responsible for vertical stacking of the annotation views.
  
- It can be subclassed if custom positioning is needed, e.g. if you wan't to position 
- annotations relative to its altitudes you would subclass ARPresenter and override 
+ It can be subclassed if custom positioning is needed, e.g. if you wan't to position
+ annotations relative to its altitudes you would subclass ARPresenter and override
  xPositionForAnnotationView and yPositionForAnnotationView.
  */
 open class ARPresenter: UIView
 {
     /**
      Stacks overlapping annotations vertically.
-    */
+     */
+    @available(iOS, deprecated:1.0, message: "Use presenterTransform = ARPresenterStackTransform()")
     open var verticalStackingEnabled = false
+        {
+        didSet
+        {
+            self.presenterTransform = self.verticalStackingEnabled ? ARPresenterStackTransform() : nil
+        }
+    }
     
     /**
      How much to vertically offset annotations by distance, in pixels per meter. Use it if distanceOffsetMode is manual or automaticOffsetMinDistance.
      
      Also look at distanceOffsetMinThreshold and distanceOffsetMode.
-    */
+     */
     open var distanceOffsetMultiplier: Double?
     
     /**
      All annotations farther(from user) than this value will be offset using distanceOffsetMultiplier. Use it if distanceOffsetMode is manual.
      
      Also look at distanceOffsetMultiplier and distanceOffsetMode.
-    */
+     */
     open var distanceOffsetMinThreshold: Double = 0
     
     /**
@@ -47,12 +54,12 @@ open class ARPresenter: UIView
     /**
      If set, it will be used instead of distanceOffsetMultiplier and distanceOffsetMinThreshold if distanceOffsetMode != none
      Use it to calculate vartical offset by given distance.
-    */
+     */
     open var distanceOffsetFunction: ((_ distance: Double) -> Double)?
     
     /**
      How low on the screen is nearest annotation. 0 = top, 1  = bottom.
-    */
+     */
     open var bottomBorder: Double = 0.55
     
     /**
@@ -72,7 +79,7 @@ open class ARPresenter: UIView
          */
         case automatic
     }
-
+    
     open weak var arViewController: ARViewController!
     /// All annotations
     open var annotations: [ARAnnotation] = []
@@ -82,8 +89,16 @@ open class ARPresenter: UIView
     open var annotationViews: [ARAnnotationView] = []
     /// AnnotationViews that are on visible part of the screen or near its border.
     open var visibleAnnotationViews: [ARAnnotationView] = []
-
-    init(arViewController: ARViewController)
+    /// Responsible for transform/layout of annotations after they have been layouted by ARPresenter. e.g. used for stacking.
+    open var presenterTransform: ARPresenterTransform?
+        {
+        didSet
+        {
+            self.presenterTransform?.arPresenter = self
+        }
+    }
+    
+    public init(arViewController: ARViewController)
     {
         self.arViewController = arViewController
         super.init(frame: CGRect.zero)
@@ -96,10 +111,10 @@ open class ARPresenter: UIView
     
     /**
      Total maximum number of visible annotation views. Default value is 100. Max value is 500.
-     This will affect performance, especially if verticalStackingEnabled.
-    */
+     This will affect performance, especially if stacking is involved.
+     */
     open var maxVisibleAnnotations = 100
-    {
+        {
         didSet
         {
             if(maxVisibleAnnotations > MAX_VISIBLE_ANNOTATIONS)
@@ -113,34 +128,40 @@ open class ARPresenter: UIView
      Default value is 0 meters, which means that distances of annotations don't affect their visiblity.
      
      This can be used to increase performance.
-    */
+     */
     open var maxDistance: Double = 0
-
+    
     
     //==========================================================================================================================================================
     // MARK:                                                               Reload - main logic
     //==========================================================================================================================================================
     /**
      This is called from ARViewController, it handles main logic, what is called and when.
-    */
+     */
     open func reload(annotations: [ARAnnotation], reloadType: ARViewController.ReloadType)
     {
         guard self.arViewController.arStatus.ready else { return }
-        var relayoutIsNeeded = false
         
-        //===== Filtering annotations and creating annotation views, only done on new reload location or when annotations changed.
-        if reloadType == .annotationsChanged || reloadType == .reloadLocationChanged || self.annotations.count == 0
+        // needsRelayout indicates that position of user or positions of annotations have changed. e.g. user moved, annotations moved/changed.
+        // This means that positions of annotations on the screen must be recalculated.
+        let needsRelayout = reloadType == .annotationsChanged || reloadType == .reloadLocationChanged || reloadType == .userLocationChanged || self.annotations.count == 0
+        
+        // Set annotations if changed
+        if reloadType == .annotationsChanged || self.annotations.count == 0
         {
             self.annotations = annotations
-            self.activeAnnotations = self.activeAnnotationsFromAnnotations(annotations: annotations)
-            self.createAnnotationViews()
-            
-            relayoutIsNeeded = true
         }
         
-        //===== Here we do stuff that must be done even on .userLocationChanged
-        if relayoutIsNeeded || reloadType == .userLocationChanged
+        // Doing heavier stuff here
+        if needsRelayout
         {
+            // Filtering annotations and creating annotation views. Doing this only on big location changes, not on any user location change.
+            if reloadType != .userLocationChanged
+            {
+                self.activeAnnotations = self.activeAnnotationsFromAnnotations(annotations: annotations)
+                self.createAnnotationViews()
+            }
+            
             self.adjustDistanceOffsetParameters()
             
             for annotationView in self.annotationViews
@@ -148,24 +169,15 @@ open class ARPresenter: UIView
                 annotationView.bindUi()
             }
             
-            relayoutIsNeeded = true
-        }
-    
-        let stackIsNeeded = relayoutIsNeeded && self.verticalStackingEnabled
-        if stackIsNeeded
-        {
             // This must be done before layout
-            self.resetStackParameters()
+            self.resetLayoutParameters()
         }
         
         self.addRemoveAnnotationViews(arStatus: self.arViewController.arStatus)
-        self.layoutAnnotationViews(arStatus: self.arViewController.arStatus, relayoutAll: relayoutIsNeeded)
         
-        if stackIsNeeded
-        {
-            // This must be done after layout.
-            self.stackAnnotationViews()
-        }
+        self.preLayout(arStatus: self.arViewController.arStatus, reloadType: reloadType, needsRelayout: needsRelayout)
+        self.layout(arStatus: self.arViewController.arStatus, reloadType: reloadType, needsRelayout: needsRelayout)
+        self.postLayout(arStatus:self.arViewController.arStatus, reloadType: reloadType, needsRelayout: needsRelayout)
     }
     
     //==========================================================================================================================================================
@@ -211,7 +223,7 @@ open class ARPresenter: UIView
     /**
      Creates views for active annotations and removes views from inactive annotations.
      @IMPROVEMENT: Add reuse logic
-    */
+     */
     open func createAnnotationViews()
     {
         var annotationViews: [ARAnnotationView] = []
@@ -284,7 +296,7 @@ open class ARPresenter: UIView
     /**
      Adds/removes annotation views to/from superview depending if view is on visible part of the screen.
      Also, if annotation view is on visible part, it is added to visibleAnnotationViews.
-    */
+     */
     open func addRemoveAnnotationViews(arStatus: ARStatus)
     {
         let degreesDeltaH = arStatus.hFov
@@ -302,7 +314,8 @@ open class ARPresenter: UIView
             {
                 if annotationView.superview == nil
                 {
-                    self.addSubview(annotationView)
+                    // insertSubview at 0 so that farther ones are beneath nearer ones
+                    self.insertSubview(annotationView, at: 0)
                 }
                 self.visibleAnnotationViews.append(annotationView)
             }
@@ -315,34 +328,34 @@ open class ARPresenter: UIView
             }
         }
     }
-
+    
     //==========================================================================================================================================================
     // MARK:                                                               Layout
     //==========================================================================================================================================================
-       /**
+    /**
      Layouts annotation views.
      - Parameter relayoutAll: If true it will call xPositionForAnnotationView/yPositionForAnnotationView for each annotation view, else
-                              it will only take previously calculated x/y positions and add heading/pitch offsets to visible annotation views.
+     it will only take previously calculated x/y positions and add heading/pitch offsets to visible annotation views.
      */
-    open func layoutAnnotationViews(arStatus: ARStatus, relayoutAll: Bool)
+    open func layout(arStatus: ARStatus, reloadType: ARViewController.ReloadType, needsRelayout: Bool)
     {
         let pitchYOffset = CGFloat(arStatus.pitch * arStatus.vPixelsPerDegree)
-        let annotationViews = relayoutAll ? self.annotationViews : self.visibleAnnotationViews
+        let annotationViews = needsRelayout ? self.annotationViews : self.visibleAnnotationViews
         
         for annotationView in annotationViews
         {
             guard let annotation = annotationView.annotation else { continue }
             
-            if(relayoutAll)
+            if(needsRelayout)
             {
                 let x = self.xPositionForAnnotationView(annotationView, arStatus: arStatus)
                 let y = self.yPositionForAnnotationView(annotationView, arStatus: arStatus)
-                annotationView.arZeroPoint = CGPoint(x: x, y: y)
+                annotationView.arPosition = CGPoint(x: x, y: y)
             }
             let headingXOffset = CGFloat(deltaAngle(annotation.azimuth, arStatus.heading)) * CGFloat(arStatus.hPixelsPerDegree)
-
-            let x: CGFloat = annotationView.arZeroPoint.x + headingXOffset
-            let y: CGFloat = annotationView.arZeroPoint.y + pitchYOffset + annotationView.arStackOffset.y
+            
+            let x: CGFloat = annotationView.arPosition.x + headingXOffset
+            let y: CGFloat = annotationView.arPosition.y + pitchYOffset + annotationView.arPositionOffset.y
             
             // Final position of annotation
             annotationView.frame = CGRect(x: x, y: y, width: annotationView.bounds.size.width, height: annotationView.bounds.size.height)
@@ -380,13 +393,34 @@ open class ARPresenter: UIView
             {
                 let distanceForOffsetCalculation = distance - self.distanceOffsetMinThreshold
                 distanceOffset = -(distanceForOffsetCalculation * distanceOffsetMultiplier)
-                
             }
         }
         
         // y
         let y = bottomY - (annotationView.bounds.size.height * annotationView.centerOffset.y) + CGFloat(distanceOffset)
         return y
+    }
+    
+    /**
+     Resets temporary stacking fields. This must be called before stacking and before layout.
+     */
+    open func resetLayoutParameters()
+    {
+        for annotationView in self.annotationViews
+        {
+            annotationView.arPositionOffset = CGPoint.zero
+            annotationView.arAlternateFrame = CGRect.zero
+        }
+    }
+    
+    open func preLayout(arStatus: ARStatus, reloadType: ARViewController.ReloadType, needsRelayout: Bool)
+    {
+        self.presenterTransform?.preLayout(arStatus: arStatus, reloadType: reloadType, needsRelayout: needsRelayout)
+    }
+    
+    open func postLayout(arStatus: ARStatus, reloadType: ARViewController.ReloadType, needsRelayout: Bool)
+    {
+        self.presenterTransform?.postLayout(arStatus: arStatus, reloadType: reloadType, needsRelayout: needsRelayout)
     }
     
     //==========================================================================================================================================================
@@ -411,7 +445,6 @@ open class ARPresenter: UIView
         }
     }
 }
-
 
 
 
