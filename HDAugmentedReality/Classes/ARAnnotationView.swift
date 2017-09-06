@@ -25,13 +25,13 @@ open class ARAnnotationView: UIView
     open weak var annotation: ARAnnotation?
 
     // Used internally for stacking
-    internal var arStackOffset = CGPoint(x: 0, y: 0)
-    internal var arStackAlternateFrame: CGRect = CGRect.zero
-    internal var arStackAlternateFrameExists: Bool = false
+    open var arStackOffset = CGPoint(x: 0, y: 0)
+    open var arStackAlternateFrame: CGRect = CGRect.zero
+    open var arStackAlternateFrameExists: Bool = false
     /// Position of annotation view without heading, pitch, stack offsets.
-    internal var arZeroPoint: CGPoint = CGPoint(x: 0, y: 0)
+    open var arZeroPoint: CGPoint = CGPoint(x: 0, y: 0)
 
-    fileprivate var initialized: Bool = false
+    open var initialized: Bool = false
     
     public init()
     {

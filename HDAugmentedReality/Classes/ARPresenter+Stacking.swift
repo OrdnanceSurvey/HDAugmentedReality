@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-extension ARPresenter
+public extension ARPresenter
 {
     //==========================================================================================================================================================
     // MARK:                                                               Stacking
@@ -24,7 +24,7 @@ extension ARPresenter
      
      Pitch/heading of the device doesn't affect relative positions of annotationViews.
      */
-    open func stackAnnotationViews()
+    public func stackAnnotationViews()
     {
         guard self.annotationViews.count > 0 else { return }
         guard let arStatus = self.arViewController?.arStatus else { return }
