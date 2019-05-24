@@ -16,11 +16,11 @@ import AVFoundation
 open class CameraView: UIView
 {
     /// Media type, set it before adding to superview.
-    open var mediaType: String = AVMediaTypeVideo
+    open var mediaType = AVMediaType.video
     /// Capture device position, set it before adding to superview.
-    open var devicePosition: AVCaptureDevicePosition = AVCaptureDevicePosition.back
+    open var devicePosition: AVCaptureDevice.Position = AVCaptureDevice.Position.back
     /// Video gravitry for videoPreviewLayer, set it before adding to superview.
-    open var videoGravity: String = AVLayerVideoGravityResizeAspectFill
+    open var videoGravity = AVLayerVideoGravity.resizeAspectFill
 
     fileprivate var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     fileprivate var captureSession: AVCaptureSession?
@@ -86,8 +86,9 @@ open class CameraView: UIView
         self.captureSession = session
         
         //===== View preview layer
-        if let videoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
+        if let captureSession = self.captureSession
         {
+            let videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
             videoPreviewLayer.videoGravity = self.videoGravity
             self.layer.insertSublayer(videoPreviewLayer, at: 0)
             self.videoPreviewLayer = videoPreviewLayer
@@ -118,25 +119,22 @@ open class CameraView: UIView
     //==========================================================================================================================================================
     
     /// Tries to find video device and add video input to it.
-    open class func createCaptureSession(withMediaType mediaType: String, position: AVCaptureDevicePosition) -> (session: AVCaptureSession?, error: NSError?)
+    open class func createCaptureSession(withMediaType mediaType: AVMediaType, position: AVCaptureDevice.Position) -> (session: AVCaptureSession?, error: NSError?)
     {
         var error: NSError?
         var captureSession: AVCaptureSession?
         var captureDevice: AVCaptureDevice?
         
         // Get all capture devices with given media type(video/photo)
-        let captureDevices = AVCaptureDevice.devices(withMediaType: mediaType)
+        let captureDevices = AVCaptureDevice.devices(for: mediaType)
         
         // Get capture device for specified position
-        if let captureDevices = captureDevices
+        for captureDeviceLoop in captureDevices
         {
-            for captureDeviceLoop in captureDevices
+            if (captureDeviceLoop as AnyObject).position == position
             {
-                if (captureDeviceLoop as AnyObject).position == position, captureDeviceLoop is AVCaptureDevice
-                {
-                    captureDevice = captureDeviceLoop as? AVCaptureDevice
-                    break
-                }
+                captureDevice = captureDeviceLoop
+                break
             }
         }
         
