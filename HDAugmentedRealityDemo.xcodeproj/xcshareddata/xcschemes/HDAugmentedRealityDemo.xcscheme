@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4C247A071F03CA1D00D0340B"
-               BuildableName = "HDAugmentedReality.framework"
-               BlueprintName = "HDAugmentedReality"
+               BlueprintIdentifier = "0CAD4EAC1AE6FC14000F2A2A"
+               BuildableName = "HDAugmentedRealityDemo.app"
+               BlueprintName = "HDAugmentedRealityDemo"
                ReferencedContainer = "container:HDAugmentedRealityDemo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,13 +28,23 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4C247A0F1F03CA1D00D0340B"
+               BuildableName = "HDAugmentedRealityTests.xctest"
+               BlueprintName = "HDAugmentedRealityTests"
+               ReferencedContainer = "container:HDAugmentedRealityDemo.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4C247A071F03CA1D00D0340B"
-            BuildableName = "HDAugmentedReality.framework"
-            BlueprintName = "HDAugmentedReality"
+            BlueprintIdentifier = "0CAD4EAC1AE6FC14000F2A2A"
+            BuildableName = "HDAugmentedRealityDemo.app"
+            BlueprintName = "HDAugmentedRealityDemo"
             ReferencedContainer = "container:HDAugmentedRealityDemo.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -51,15 +61,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4C247A071F03CA1D00D0340B"
-            BuildableName = "HDAugmentedReality.framework"
-            BlueprintName = "HDAugmentedReality"
+            BlueprintIdentifier = "0CAD4EAC1AE6FC14000F2A2A"
+            BuildableName = "HDAugmentedRealityDemo.app"
+            BlueprintName = "HDAugmentedRealityDemo"
             ReferencedContainer = "container:HDAugmentedRealityDemo.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -69,15 +80,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4C247A071F03CA1D00D0340B"
-            BuildableName = "HDAugmentedReality.framework"
-            BlueprintName = "HDAugmentedReality"
+            BlueprintIdentifier = "0CAD4EAC1AE6FC14000F2A2A"
+            BuildableName = "HDAugmentedRealityDemo.app"
+            BlueprintName = "HDAugmentedRealityDemo"
             ReferencedContainer = "container:HDAugmentedRealityDemo.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
