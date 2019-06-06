@@ -17,6 +17,7 @@ import GLKit
     @objc optional func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateUserLocation location: CLLocation)
     @objc optional func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateReloadLocation location: CLLocation)
     @objc optional func arTrackingManager(_ trackingManager: ARTrackingManager, didFailToFindLocationAfter elapsedSeconds: TimeInterval)
+    @objc optional func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateHeading newHeading: CLHeading)
     
     @objc optional func logText(_ text: String)
 }
@@ -233,6 +234,7 @@ public class ARTrackingManager: NSObject, CLLocationManagerDelegate
     
     public func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading)
     {
+        delegate?.arTrackingManager?(self, didUpdateHeading: newHeading)
         if newHeading.headingAccuracy < 0 || newHeading.headingAccuracy > self.minimumHeadingAccuracy
         {
             return

@@ -131,7 +131,7 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
     }
     
     /// Intended for use in subclasses, no need to call super
-    internal func initialize()
+    public func initialize()
     {
         
     }
@@ -355,7 +355,7 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
         }
     }
     
-    internal func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateUserLocation location: CLLocation)
+    open func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateUserLocation location: CLLocation)
     {
         self.arStatus.userLocation = location
         self.lastLocation = location
@@ -365,7 +365,7 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
         if(self.uiOptions.debugLabel) { self.showDebugViewWithColor(color: UIColor.red) }
     }
     
-    internal func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateReloadLocation location: CLLocation)
+    open func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateReloadLocation location: CLLocation)
     {
         self.arStatus.userLocation = location
         self.lastLocation = location
@@ -389,9 +389,13 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
         if(self.uiOptions.debugLabel) { self.showDebugViewWithColor(color: UIColor.blue) }
     }
     
-    internal func arTrackingManager(_ trackingManager: ARTrackingManager, didFailToFindLocationAfter elapsedSeconds: TimeInterval)
+    open func arTrackingManager(_ trackingManager: ARTrackingManager, didFailToFindLocationAfter elapsedSeconds: TimeInterval)
     {
         self.onDidFailToFindLocation?(elapsedSeconds, self.lastLocation != nil)
+    }
+    
+    open func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateHeading newHeading: CLHeading) {
+        
     }
     
     //==========================================================================================================================================================
@@ -559,10 +563,7 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
     /// Opening DebugMapViewController
     internal func debugButtonTap()
     {
-       // self.presenter.reload(annotations: self.annotations, reloadType: .userLocationChanged)
-        //return
-
-            // DEBUG
+        // DEBUG
         let bundle = Bundle(for: DebugMapViewController.self)
         let mapViewController = DebugMapViewController(nibName: "DebugMapViewController", bundle: bundle)
         self.present(mapViewController, animated: true, completion: nil)
@@ -647,7 +648,7 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
             
             self.debugPitchSlider?.transform = .identity
             self.debugPitchSlider?.frame = CGRect(x: width - (height - 40) / 2 - 20, y: height/2, width: height - 40, height: 20);
-            self.debugPitchSlider?.transform = CGAffineTransform(rotationAngle: CGFloat(-M_PI * 0.5))
+            self.debugPitchSlider?.transform = CGAffineTransform(rotationAngle: CGFloat(-.pi * 0.5))
         }
     }
     
