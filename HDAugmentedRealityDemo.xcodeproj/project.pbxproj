@@ -47,6 +47,7 @@
 		4C4DB7DF1F601CDF004D8AD3 /* ARPresenterTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4DB7DE1F601CDF004D8AD3 /* ARPresenterTransform.swift */; };
 		4C4DB7E11F601D50004D8AD3 /* FrontRowTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C4DB7E01F601D50004D8AD3 /* FrontRowTransform.swift */; };
 		4C4DB7E21F601E24004D8AD3 /* ARPresenterTransform.swift in Headers */ = {isa = PBXBuildFile; fileRef = 4C4DB7DE1F601CDF004D8AD3 /* ARPresenterTransform.swift */; settings = {ATTRIBUTES = (Public, ); }; };
+		B4BDCCD322B3A22A005B589D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4BDCCD222B3A22A005B589D /* Logger.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -119,6 +120,7 @@
 		4C247A191F03CA1D00D0340B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4C4DB7DE1F601CDF004D8AD3 /* ARPresenterTransform.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ARPresenterTransform.swift; sourceTree = "<group>"; };
 		4C4DB7E01F601D50004D8AD3 /* FrontRowTransform.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrontRowTransform.swift; sourceTree = "<group>"; };
+		B4BDCCD222B3A22A005B589D /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -239,6 +241,7 @@
 				4C4DB7DE1F601CDF004D8AD3 /* ARPresenterTransform.swift */,
 				0CF0F8E51BC5E70C00C7646E /* Debug */,
 				0C4FD3651E06DF8D00F20DAA /* External */,
+				B4BDCCD222B3A22A005B589D /* Logger.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -321,6 +324,7 @@
 				4C247A041F03CA1D00D0340B /* Frameworks */,
 				4C247A051F03CA1D00D0340B /* Headers */,
 				4C247A061F03CA1D00D0340B /* Resources */,
+				B4BDCCD122B3A0A3005B589D /* Swift lint */,
 			);
 			buildRules = (
 			);
@@ -359,7 +363,7 @@
 				LastSwiftMigration = 0700;
 				LastSwiftUpdateCheck = 0830;
 				LastUpgradeCheck = 1020;
-				ORGANIZATIONNAME = "Danijel Huis";
+				ORGANIZATIONNAME = "Ordnance Survey";
 				TargetAttributes = {
 					0CAD4EAC1AE6FC14000F2A2A = {
 						CreatedOnToolsVersion = 6.2;
@@ -430,6 +434,28 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		B4BDCCD122B3A0A3005B589D /* Swift lint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Swift lint";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -f /usr/local/bin/swiftlint ]; then\n    /usr/local/bin/swiftlint\nelse\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		0CAD4EA91AE6FC14000F2A2A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -452,6 +478,7 @@
 				4C247A381F03D29400D0340B /* ARConfiguration.swift in Sources */,
 				4C247A371F03D29200D0340B /* ARAnnotationView.swift in Sources */,
 				4C247A3A1F03D29900D0340B /* ARViewController.swift in Sources */,
+				B4BDCCD322B3A22A005B589D /* Logger.swift in Sources */,
 				4C247A3B1F03D29F00D0340B /* ARPresenter.swift in Sources */,
 				4C247A3D1F03D2A400D0340B /* DebugMapViewController.swift in Sources */,
 				4C247A3E1F03D2A600D0340B /* CameraView.swift in Sources */,
@@ -612,7 +639,6 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = HDAugmentedRealityDemo/Info.plist;
@@ -630,7 +656,6 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = HDAugmentedRealityDemo/Info.plist;
@@ -648,6 +673,7 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -669,6 +695,7 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;

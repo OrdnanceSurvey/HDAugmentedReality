@@ -10,106 +10,87 @@ import UIKit
 import MapKit
 
 /// Called from ARViewController for debugging purposes
-open class DebugMapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate
-{
+open class DebugMapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var mapView: MKMapView!
     fileprivate var annotations: [ARAnnotation]?
     fileprivate var locationManager = CLLocationManager()
     fileprivate var heading: Double = 0
     fileprivate var interactionInProgress = false
-    
-    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?)
-    {
+
+    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
-    
-    required public init?(coder aDecoder: NSCoder)
-    {
+
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-    
-    open override func viewDidLoad()
-    {
+
+    open override func viewDidLoad() {
         super.viewDidLoad()
         self.mapView.isRotateEnabled = false
-        
-        if let annotations = self.annotations
-        {
+
+        if let annotations = self.annotations {
             addAnnotationsOnMap(annotations)
         }
         locationManager.delegate = self
     }
-    
-    open override func viewDidAppear(_ animated: Bool)
-    {
+
+    open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         locationManager.startUpdatingHeading()
     }
-    
-    open override func viewDidDisappear(_ animated: Bool)
-    {
+
+    open override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         locationManager.stopUpdatingHeading()
     }
 
-    
-    open func addAnnotations(_ annotations: [ARAnnotation])
-    {
+    open func addAnnotations(_ annotations: [ARAnnotation]) {
         self.annotations = annotations
-        
-        if self.isViewLoaded
-        {
+
+        if self.isViewLoaded {
             addAnnotationsOnMap(annotations)
         }
     }
-    
-    fileprivate func addAnnotationsOnMap(_ annotations: [ARAnnotation])
-    {
+
+    fileprivate func addAnnotationsOnMap(_ annotations: [ARAnnotation]) {
         var mapAnnotations: [MKPointAnnotation] = []
-        for annotation in annotations
-        {
+        for annotation in annotations {
             let coordinate = annotation.location.coordinate
-            
+
             let mapAnnotation = MKPointAnnotation()
             mapAnnotation.coordinate = coordinate
             let text = String(format: "%@, AZ: %.0f, %.0fm", annotation.title != nil ? annotation.title! : "", annotation.azimuth, annotation.distanceFromUser)
             mapAnnotation.title = text
             mapAnnotations.append(mapAnnotation)
-            
+
         }
         mapView.addAnnotations(mapAnnotations)
         mapView.showAnnotations(mapAnnotations, animated: false)
     }
-    
-    
-    @IBAction func longTap(_ sender: UILongPressGestureRecognizer)
-    {
-        if sender.state == .began
-        {
+
+    @IBAction func longTap(_ sender: UILongPressGestureRecognizer) {
+        if sender.state == .began {
             let point = sender.location(in: self.mapView)
             let coordinate = self.mapView.convert(point, toCoordinateFrom: self.mapView)
             let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-            let userInfo: [AnyHashable: Any] = ["location" : location]
+            let userInfo: [AnyHashable: Any] = ["location": location]
             self.presentingViewController?.dismiss(animated: true, completion: nil)
-            
+
             // Delay to allow trackingManager to update heading/pitch etc
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(1.0 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC))
-            {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(1.0 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "kNotificationLocationSet"), object: nil, userInfo: userInfo)
             }
         }
     }
-    
-    @IBAction func closeButtonTap(_ sender: AnyObject)
-    {
+
+    @IBAction func closeButtonTap(_ sender: AnyObject) {
         self.presentingViewController?.dismiss(animated: true, completion: nil)
     }
-    
-    
-    open func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading)
-    {
+
+    open func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         heading = newHeading.trueHeading
-        
+
         // Rotate map
         /*if(!self.interactionInProgress && CLLocationCoordinate2DIsValid(mapView.centerCoordinate))
         {
@@ -118,14 +99,12 @@ open class DebugMapViewController: UIViewController, MKMapViewDelegate, CLLocati
             self.mapView.setCamera(camera, animated: false)
         }*/
     }
-    
-    open func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool)
-    {
+
+    open func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
         self.interactionInProgress = true
     }
-    
-    open func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool)
-    {
+
+    open func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         self.interactionInProgress = false
     }
 }

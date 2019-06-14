@@ -13,8 +13,7 @@ import AVFoundation
  UIView with video preview layer. Call startRunning/stopRunning to start/stop capture session.
  Use createCaptureSession to check if cameraView can be initialized correctly.
  */
-open class CameraView: UIView
-{
+open class CameraView: UIView {
     /// Media type, set it before adding to superview.
     open var mediaType = AVMediaType.video
     /// Capture device position, set it before adding to superview.
@@ -26,175 +25,137 @@ open class CameraView: UIView
     fileprivate var captureSession: AVCaptureSession?
 
     //==========================================================================================================================================================
-    //MARK:                                                        UIView overrides
+    // MARK: UIView overrides
     //==========================================================================================================================================================
-    open override func didMoveToSuperview()
-    {
+    open override func didMoveToSuperview() {
         super.didMoveToSuperview()
-        
-        if self.superview != nil
-        {
+
+        if self.superview != nil {
             self.createSessionAndVideoPreviewLayer()
             self.setNeedsLayout()
-        }
-        else
-        {
+        } else {
             self.destroySessionAndVideoPreviewLayer()
         }
     }
-    
-    open override func layoutSubviews()
-    {
+
+    open override func layoutSubviews() {
         super.layoutSubviews()
         self.layoutUi()
     }
-    
-    fileprivate func layoutUi()
-    {
+
+    fileprivate func layoutUi() {
         self.videoPreviewLayer?.frame = self.bounds
     }
-    
+
     //==========================================================================================================================================================
-    //MARK:                                                        Main logic
+    // MARK: Main logic
     //==========================================================================================================================================================
-    
+
     /// Starts running capture session
-    open func startRunning()
-    {
-        //print("CameraView: Called startRunning before added to subview")
+    open func startRunning() {
         self.captureSession?.startRunning()
     }
-    
+
     /// Stops running capture session
-    open func stopRunning()
-    {
+    open func stopRunning() {
         self.captureSession?.stopRunning()
     }
-    
+
     /// Creates capture session and video preview layer, destroySessionAndVideoPreviewLayer is called.
-    fileprivate func createSessionAndVideoPreviewLayer()
-    {
+    fileprivate func createSessionAndVideoPreviewLayer() {
         self.destroySessionAndVideoPreviewLayer()
-        
+
         //===== Capture session
         let captureSessionResult = CameraView.createCaptureSession(withMediaType: self.mediaType, position: self.devicePosition)
-        guard captureSessionResult.error == nil, let session = captureSessionResult.session else
-        {
-            print("CameraView: Cannot create capture session, use createCaptureSession method to check if device is capable for augmented reality.")
+        guard captureSessionResult.error == nil, let session = captureSessionResult.session else {
+            Log.logger?.warning("CameraView: Cannot create capture session, use createCaptureSession method to check if device is capable for augmented reality.")
             return
         }
         self.captureSession = session
-        
+
         //===== View preview layer
-        if let captureSession = self.captureSession
-        {
+        if let captureSession = self.captureSession {
             let videoPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
             videoPreviewLayer.videoGravity = self.videoGravity
             self.layer.insertSublayer(videoPreviewLayer, at: 0)
             self.videoPreviewLayer = videoPreviewLayer
         }
     }
-    
+
     /// Stops running and destroys capture session, removes and destroys video preview layer.
-    fileprivate func destroySessionAndVideoPreviewLayer()
-    {
+    fileprivate func destroySessionAndVideoPreviewLayer() {
         self.stopRunning()
         self.videoPreviewLayer?.removeFromSuperlayer()
         self.videoPreviewLayer = nil
         self.captureSession = nil
     }
-    
-    open func setVideoOrientation(_ orientation: UIInterfaceOrientation)
-    {
-        if self.videoPreviewLayer?.connection?.isVideoOrientationSupported != nil
-        {
-            if let videoOrientation = AVCaptureVideoOrientation(rawValue: Int(orientation.rawValue))
-            {
+
+    open func setVideoOrientation(_ orientation: UIInterfaceOrientation) {
+        if self.videoPreviewLayer?.connection?.isVideoOrientationSupported != nil {
+            if let videoOrientation = AVCaptureVideoOrientation(rawValue: Int(orientation.rawValue)) {
                 self.videoPreviewLayer?.connection?.videoOrientation = videoOrientation
             }
         }
     }
     //==========================================================================================================================================================
-    //MARK:                                                        Utilities
+    // MARK: Utilities
     //==========================================================================================================================================================
-    
+
     /// Tries to find video device and add video input to it.
-    open class func createCaptureSession(withMediaType mediaType: AVMediaType, position: AVCaptureDevice.Position) -> (session: AVCaptureSession?, error: NSError?)
-    {
+    open class func createCaptureSession(withMediaType mediaType: AVMediaType, position: AVCaptureDevice.Position) -> (session: AVCaptureSession?, error: NSError?) {
         var error: NSError?
         var captureSession: AVCaptureSession?
         var captureDevice: AVCaptureDevice?
-        
+
         // Get all capture devices with given media type(video/photo)
         let captureDevices = AVCaptureDevice.devices(for: mediaType)
-        
+
         // Get capture device for specified position
-        for captureDeviceLoop in captureDevices
-        {
-            if (captureDeviceLoop as AnyObject).position == position
-            {
-                captureDevice = captureDeviceLoop
-                break
-            }
+        for captureDeviceLoop in captureDevices where (captureDeviceLoop as AnyObject).position == position {
+            captureDevice = captureDeviceLoop
         }
-        
-        if let captureDevice = captureDevice
-        {
+
+        if let captureDevice = captureDevice {
             // Get video input device
             var captureDeviceInput: AVCaptureDeviceInput?
-            do
-            {
+            do {
                 captureDeviceInput = try AVCaptureDeviceInput(device: captureDevice)
-            }
-            catch let deviceError as NSError
-            {
+            } catch let deviceError as NSError {
                 error = deviceError
                 captureDeviceInput = nil
             }
-            
-            if let captureDeviceInput = captureDeviceInput, error == nil
-            {
+
+            if let captureDeviceInput = captureDeviceInput, error == nil {
                 let session = AVCaptureSession()
-                
-                if session.canAddInput(captureDeviceInput)
-                {
+
+                if session.canAddInput(captureDeviceInput) {
                     session.addInput(captureDeviceInput)
-                }
-                else
-                {
+                } else {
                     error = NSError(domain: "CameraView", code: 10002, userInfo: ["description": "Error adding video input."])
                 }
-                
+
                 captureSession = session
-            }
-            else
-            {
+            } else {
                 error = NSError(domain: "CameraView", code: 10001, userInfo: ["description": "Error creating capture device input."])
             }
-        }
-        else
-        {
+        } else {
             error = NSError(domain: "CameraView", code: 10000, userInfo: ["description": "Back video device not found."])
         }
-        
+
         return (session: captureSession, error: error)
     }
-    
-    open func inputDevice() -> AVCaptureDevice?
-    {
+
+    open func inputDevice() -> AVCaptureDevice? {
         guard let inputs = self.captureSession?.inputs else { return nil }
-        
-        var inputDevice: AVCaptureDevice? = nil
-        for input in inputs
-        {
-            if let input = input as? AVCaptureDeviceInput
-            {
+
+        var inputDevice: AVCaptureDevice?
+        for input in inputs {
+            if let input = input as? AVCaptureDeviceInput {
                 inputDevice = input.device
                 break
             }
         }
-        
+
         return inputDevice
     }
 }
-
